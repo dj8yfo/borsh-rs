@@ -1,12 +1,11 @@
 use core::convert::TryFrom;
-use core::hash::BuildHasher;
 use core::marker::PhantomData;
 use core::mem::size_of;
 
 use crate::__maybestd::{
     borrow::{Cow, ToOwned},
     boxed::Box,
-    collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap, HashSet, LinkedList, VecDeque},
+    collections::{BTreeMap, BTreeSet, BinaryHeap, LinkedList, VecDeque},
     io::{Error, ErrorKind, Result, Write},
     string::String,
     vec::Vec,
@@ -346,46 +345,6 @@ where
             &(u32::try_from(self.len()).map_err(|_| ErrorKind::InvalidInput)?).to_le_bytes(),
         )?;
         for item in self {
-            item.serialize(writer)?;
-        }
-        Ok(())
-    }
-}
-
-impl<K, V, H> BorshSerialize for HashMap<K, V, H>
-where
-    K: BorshSerialize + PartialOrd,
-    V: BorshSerialize,
-    H: BuildHasher,
-{
-    #[inline]
-    fn serialize<W: Write>(&self, writer: &mut W) -> Result<()> {
-        let mut vec = self.iter().collect::<Vec<_>>();
-        vec.sort_by(|(a, _), (b, _)| a.partial_cmp(b).unwrap());
-        u32::try_from(vec.len())
-            .map_err(|_| ErrorKind::InvalidInput)?
-            .serialize(writer)?;
-        for (key, value) in vec {
-            key.serialize(writer)?;
-            value.serialize(writer)?;
-        }
-        Ok(())
-    }
-}
-
-impl<T, H> BorshSerialize for HashSet<T, H>
-where
-    T: BorshSerialize + PartialOrd,
-    H: BuildHasher,
-{
-    #[inline]
-    fn serialize<W: Write>(&self, writer: &mut W) -> Result<()> {
-        let mut vec = self.iter().collect::<Vec<_>>();
-        vec.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        u32::try_from(vec.len())
-            .map_err(|_| ErrorKind::InvalidInput)?
-            .serialize(writer)?;
-        for item in vec {
             item.serialize(writer)?;
         }
         Ok(())
