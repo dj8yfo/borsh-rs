@@ -5,7 +5,13 @@ fn test_ipv4_addr_roundtrip_enum() {
     let original = IpAddr::V4(Ipv4Addr::new(192, 168, 0, 1));
     let encoded = borsh::to_vec(&original).expect("Serialization failed");
     #[cfg(feature = "std")]
-    insta::assert_debug_snapshot!(encoded);
+    {
+        let mut settings = insta::Settings::clone_current();
+        settings.set_prepend_module_to_snapshot(false);
+        settings.bind(|| {
+            insta::assert_debug_snapshot!(encoded);
+        });
+    }
     let decoded = borsh::from_slice::<IpAddr>(&encoded).expect("Deserialization failed");
     assert_eq!(original, decoded);
 }

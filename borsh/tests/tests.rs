@@ -36,6 +36,23 @@ mod compile_derives {
     }
 }
 
+/// cargo test --features unstable__tokio 'roundtrip_async'
+/// cargo test --features unstable__async-std 'roundtrip_async'
+/// 
+/// will be covered by all-right by
+/// ```bash
+/// cargo test --features derive,unstable__tokio
+/// cargo test --features derive,unstable__async-std
+/// ```
+#[rustfmt::skip]
+#[cfg(feature = "unstable__async")]
+mod roundtrip_async {
+    #[cfg(feature = "std")]
+    mod test_ip_addr;
+    mod test_vecs;
+
+}
+
 /// These are full roundtrip `BorshSerialize`/`BorshDeserialize` tests
 #[rustfmt::skip]
 mod roundtrip {
